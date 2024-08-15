@@ -21,5 +21,16 @@ class GestionSeance :
             print(f"Erreur lors de l'insertion : {err}")
             self.conn.rollback()
             return False
+    def getStatistique(self,idUser) : 
+        select_query=""" 
+                    SELECT module,AVG(prcAnger),AVG(prcDisgust),AVG(prcFear),
+                    AVG(prcHappiness),AVG(prcNeutral),AVG(prcSadness),AVG(prcSurprise)
+                    FROM seances
+                    WHERE user_id=%s
+                    GROUP BY module;
+                    """
+        self.cursor.execute(select_query,(idUser,))
+        resultat=self.cursor.fetchall()
+        return resultat
 
     

@@ -83,16 +83,23 @@ def insertNewSeance() :
     return jsonify(r)
 
 
-
-
-
-
-
-
-
-
-
-
-
+@app.route("/getStatistique",methods=["POST"])
+def getStatistiaue()  :
+    idUser=request.get_json()["user"]
+    resultat={}
+    for res in ges.getStatistique(idUser) : 
+        # resultat.append({
+        #     "module" : res[0],
+        #     "anger" : round(res[1],2),
+        #     "disgust" : round(res[2],2),
+        #     "fear" : round(res[3],2),
+        #     "happy" : round(res[4],2),
+        #     "neutral" : round(res[5],2),
+        #     "sadness" : round(res[6],2),
+        #     "surprise" : round(res[7],2)
+        # })["anger","disgust","fear","happy","neutral","sadness","surprise"]
+        resultat[res[0]]=[round(res[1],2),round(res[2],2),round(res[3],2),round(res[4],2),round(res[5],2),round(res[6],2),round(res[7],2)]
+    print(resultat)
+    return jsonify(resultat)
 if __name__ == '__main__':
     serve(app,host="0.0.0.0",port=5000)
