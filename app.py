@@ -36,9 +36,10 @@ def tstCnx() :
 
 @app.route('/detect', methods=['POST'])
 def detect(): 
-    print("first")
-    print(len(yolo.faces_detected_total))    
     data = request.get_json()
+    print(data["isStop"])
+    if data["isStop"] : 
+        return {"class_name" : [],"frame" : data["image"]}
     image_data = data['image']
     image_data = image_data.split(",")[1]
     image = Image.open(BytesIO(base64.b64decode(image_data)))
@@ -59,6 +60,12 @@ def register():
     res=authentification.register(request.get_json())
     return jsonify({"res" : res})
 
+@app.route('/auth/updateProfile', methods=['POST'])
+def updateProfile():
+    print(request.get_json())
+    res=authentification.update(request.get_json())
+    return jsonify({"succes" : res})
+
 
 
 @app.route("/auth/login",methods=["POST"])
@@ -71,7 +78,7 @@ def insertNewSeance() :
     seance=request.get_json()
     tabEmotions=yolo.faces_detected_total[seance["user_id"]]
     print("after yolo.faces_detected_total")
-    print(len(yolo.faces_detected_total))
+    # print(len(yolo.faces_detected_total))
     r={}
     for e in set(tabEmotions): 
         r[e]=round((tabEmotions.count(e)/len(tabEmotions))*100,2)
@@ -86,20 +93,25 @@ def insertNewSeance() :
 @app.route("/getStatistique",methods=["POST"])
 def getStatistiaue()  :
     idUser=request.get_json()["user"]
+    print(idUser)
     resultat={}
     for res in ges.getStatistique(idUser) : 
-        # resultat.append({
-        #     "module" : res[0],
-        #     "anger" : round(res[1],2),
-        #     "disgust" : round(res[2],2),
-        #     "fear" : round(res[3],2),
-        #     "happy" : round(res[4],2),
-        #     "neutral" : round(res[5],2),
-        #     "sadness" : round(res[6],2),
-        #     "surprise" : round(res[7],2)
-        # })["anger","disgust","fear","happy","neutral","sadness","surprise"]
         resultat[res[0]]=[round(res[1],2),round(res[2],2),round(res[3],2),round(res[4],2),round(res[5],2),round(res[6],2),round(res[7],2)]
     print(resultat)
     return jsonify(resultat)
+
+
+
+@app.route("/getAllUsers",methods=["GET"])
+def getAllUsers()  :
+    return jsonify(authentification.getAllUsers())
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     serve(app,host="0.0.0.0",port=5000)
