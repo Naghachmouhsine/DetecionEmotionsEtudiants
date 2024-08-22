@@ -60,8 +60,18 @@ class Authentification :
         SET nom=%s,prenom=%s,role=%s 
         WHERE email=%s
         """
+        data = (user["nom"], user["prenom"], user["role"],user["email"])
+        if "password" in user.keys() : 
+            hashed_password =hash_password(user["password"])
+            data = (user["nom"], user["prenom"],user["role"],hashed_password.decode('utf-8'), user["email"])
+            update_query =""" 
+                            UPDATE users 
+                            SET nom=%s,prenom=%s,role=%s,password=%s
+                            WHERE email=%s
+                        """
         try:
-            data = (user["nom"], user["prenom"], user["role"],user["email"])
+            print(update_query)
+            print(data)
             self.cursor.execute(update_query, data)
             self.conn.commit()
             return True
@@ -70,7 +80,7 @@ class Authentification :
             self.conn.rollback()
             return False
     def getAllUsers(self) : 
-        select_query="select * from users"
+        select_query="select * from users where isArchive=0"
         self.cursor.execute(select_query)
         results=self.cursor.fetchall()
         users=[]
@@ -84,6 +94,22 @@ class Authentification :
                     "role" : user[5]
                 })
         return users
+
+    def delete(self, userId):
+        update_query = """ 
+        UPDATE users 
+        SET isArchive=1
+        WHERE id=%s
+        """
+        data = (userId,)
+        try:
+            self.cursor.execute(update_query, data)
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Erreur lors d'update : {err}")
+            self.conn.rollback()
+            return False
 
 
 def hash_password(password) : 

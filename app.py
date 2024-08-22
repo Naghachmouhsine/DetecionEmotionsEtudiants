@@ -67,6 +67,13 @@ def updateProfile():
     return jsonify({"succes" : res})
 
 
+@app.route('/auth/deleteProfile', methods=['POST'])
+def deleteProfile():
+    print(request.get_json())
+    res=authentification.delete(request.get_json()["id"])
+    return jsonify({"succes" : res})
+
+
 
 @app.route("/auth/login",methods=["POST"])
 def auth() : 
