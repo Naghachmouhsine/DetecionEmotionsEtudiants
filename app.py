@@ -25,6 +25,11 @@ conn=cnx.connect(
 )
 authentification=auth.Authentification(conn)
 ges=gestionSeance.GestionSeance(conn)
+
+
+
+
+
 faces_detected=[]
 @app.route('/')
 def index():
@@ -97,16 +102,27 @@ def insertNewSeance() :
     return jsonify(r)
 
 
-@app.route("/getStatistique",methods=["POST"])
-def getStatistiaue()  :
-    idUser=request.get_json()["user"]
-    print(idUser)
-    resultat={}
-    for res in ges.getStatistique(idUser) : 
-        resultat[res[0]]=[round(res[1],2),round(res[2],2),round(res[3],2),round(res[4],2),round(res[5],2),round(res[6],2),round(res[7],2)]
-    print(resultat)
+
+
+
+
+@app.route("/getStatistique",methods=["GET"])
+def getStatistique()  :
+    resultat1={}
+    resultat2={}
+    for res in ges.getStatistique() : 
+        resultat1[res[0]]=[round(res[1],2),round(res[2],2),round(res[3],2),round(res[4],2),round(res[5],2),round(res[6],2),round(res[7],2)]
+    resultat2=ges.getStatistique2()
+    resultat={
+        "statistique1" : resultat1,
+        "statistique2" : resultat2,
+    }
     return jsonify(resultat)
 
+# @app.route("/getStatistiqu2",methods=["GET"])
+# def getStatistique2()  :
+#     resultat=ges.getStatistique2()
+#     return jsonify(resultat)
 
 
 @app.route("/getAllUsers",methods=["GET"])
@@ -115,10 +131,7 @@ def getAllUsers()  :
 
 
 
-
-
-
-
-
 if __name__ == '__main__':
-    serve(app,host="0.0.0.0",port=5000)
+    serve(app, host="0.0.0.0", port=5000, threads=16)
+
+

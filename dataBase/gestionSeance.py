@@ -1,6 +1,4 @@
-
-
-
+import pandas as pd
 class GestionSeance : 
     def __init__(self,cnx) : 
         self.conn=cnx
@@ -21,16 +19,30 @@ class GestionSeance :
             print(f"Erreur lors de l'insertion : {err}")
             self.conn.rollback()
             return False
-    def getStatistique(self,idUser) : 
+    def getStatistique(self) : 
         select_query=""" 
                     SELECT module,AVG(prcAnger),AVG(prcDisgust),AVG(prcFear),
                     AVG(prcHappiness),AVG(prcNeutral),AVG(prcSadness),AVG(prcSurprise)
                     FROM seances
-                    WHERE user_id=%s
                     GROUP BY module;
                     """
-        self.cursor.execute(select_query,(idUser,))
+        self.cursor.execute(select_query)
         resultat=self.cursor.fetchall()
         return resultat
+    def getStatistique2(self) : 
+        select_query=""" 
+        SELECT module,dateSeance,
+        (((prcHappiness+prcNeutral)-(prcAnger+prcDisgust+prcFear+prcSadness+prcSurprise))/100) as indiceSatisfaction  
+        FROM seances 
+        ORDER BY module,dateSeance;
+        """
+        df=pd.read_sql(select_query,self.conn)
+        df["numSeance"]=df.groupby("module").cumcount() +1
+        resultat=df.groupby("module").apply(lambda x : x[["numSeance","indiceSatisfaction"]].to_dict(orient="list")).to_dict()
+        return resultat
+
+
+
+            
 
     
